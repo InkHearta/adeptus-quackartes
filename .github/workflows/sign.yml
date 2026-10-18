@@ -1,0 +1,50 @@
+name: Sign petition
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: signatures
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    if: contains(github.event.issue.labels.*.name, 'signature')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Append signature
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LOGIN: ${{ github.event.issue.user.login }}
+          NUM: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          if grep -qi "^- @${LOGIN} " SIGNATURES.md; then
+            gh issue comment "$NUM" --body "Брат @${LOGIN}, твоя подпись уже внесена в Кодекс. Император помнит."
+            gh issue close "$NUM"
+            exit 0
+          fi
+
+          CHAPTER=$(printf '%s\n' "$BODY" | awk '/^### /{f=0} /^### Ваш Кряк-Орден/{f=1;next} f && NF {print; exit}')
+          [ "$CHAPTER" = "_No response_" ] && CHAPTER=""
+          CHAPTER=$(printf '%s' "$CHAPTER" | tr -d '\r`<>')
+
+          LINE="- @${LOGIN} "
+          [ -n "$CHAPTER" ] && LINE="${LINE}— ${CHAPTER} "
+          LINE="${LINE}($(date -u +%Y-%m-%d))"
+          echo "$LINE" >> SIGNATURES.md
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SIGNATURES.md
+          git commit -m "Подпись: @${LOGIN}"
+          git push
+
+          gh issue comment "$NUM" --body "Подпись @${LOGIN} принята. Кряк и вера! 🦆"
+          gh issue close "$NUM"
