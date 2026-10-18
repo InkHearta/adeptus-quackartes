@@ -1,0 +1,12 @@
+name: Подписать петицию
+description: Встать в ряды Адептус Кряктартес
+title: "Подпись"
+labels: ["signature"]
+body:
+  - type: input
+    id: chapter
+    attributes:
+      label: Ваш Кряк-Орден
+      placeholder: Ультракряки
+    validations:
+      required: false
