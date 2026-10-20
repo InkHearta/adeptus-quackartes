@@ -3,3 +3,4 @@
 - @DreamShaded — Огненные Селезни (2026-10-18)
 - @elizavetaMenshikova (2026-10-18)
 - @wolket — Sberbank (2026-10-18)
+- @dmitry-korolev — Сыны Асинхрона (2026-10-20)
